@@ -10,6 +10,8 @@ It's used in conjunction with [virtual-dom](https://github.com/Matt-Esch/virtual
 Note
 ----
 
+Forked by Gawker to add the ability to specify a function for setting any property hooks on the element.
+
 As of v0.5.1, `html-to-vdom` no longer supports browsers without a full ES5 implementation.
 
 As of v0.3.0, the VNode and VText classes need to be passed in during library initialization from the `virtual-dom` module you are using.  
@@ -61,6 +63,29 @@ var convertHTMLWithKey = convertHTML.bind(null, {
 });
 
 convertHTMLWithKey('<div id="foo"></div>');
+```
+
+### Specifying property hooks
+`virtual-dom` supports property hooks, which let you define custom getter/setter behavior for a property. You can have convertHTML set them
+by specifying a `getVHooks` function like:
+
+```javascript
+var converted = convertHTML({
+    getVHooks: function (attributes) {
+        var hooks = {}, CustomSetterHook;
+        if (attributes.dataset.customSetter) {
+           CustomSetterHook = function () {};
+           CustomSetterHook.prototype.hook = function (node, property) {
+              window.setTimeout(function () {
+                node.setAttribute('customAttributeName', property);
+              }, 0);
+           }
+           CustomSetterHook.prototype.unhook = function (node, property) {};
+        }
+        hooks.hookedProperty = new CustomSetterHook();
+        return hooks;
+    }
+}, '<div id="foo"></div>');
 ```
 
 Credits
